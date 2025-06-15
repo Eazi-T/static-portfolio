@@ -7,7 +7,7 @@ VM_NAME="StaticWebVM"
 IMAGE="Ubuntu2204"
 ADMIN_USERNAME="azureuser"
 VM_SIZE="Standard_B1s"
-SSH_KEY_PATH="./id_rsa.pub"
+SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
 
 # ==== STEP 1: CREATE RESOURCE GROUP ====
 echo "Creating resource group..."
