@@ -10,7 +10,7 @@ VM_SIZE="Standard_B1s"
 SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
 
 # ==== STEP 1: CREATE RESOURCE GROUP ====
-echo "Creating resource group..."
+echo "Creating A resource group..."
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
 # ==== STEP 2: READ PUBLIC KEY CONTENT ====
