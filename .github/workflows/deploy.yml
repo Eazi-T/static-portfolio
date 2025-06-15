@@ -42,4 +42,7 @@ jobs:
 
 
     - name: Run Deployment Script
-      run: bash deploy.sh
+      run: |
+        echo "${{ secrets.SSH_PUBLIC_KEY }}" | tr -d '\r' > public_key.txt
+        bash deploy.sh "$(cat public_key.txt)"
+    

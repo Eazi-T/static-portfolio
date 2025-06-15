@@ -7,17 +7,13 @@ VM_NAME="StaticWebVM"
 IMAGE="Ubuntu2204"
 ADMIN_USERNAME="azureuser"
 VM_SIZE="Standard_B1s"
-SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
+SSH_KEY_CONTENT="$1"  # Passed from GitHub Actions
 
 # ==== STEP 1: CREATE RESOURCE GROUP ====
 echo "Creating A resource group..."
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
-# ==== STEP 2: READ PUBLIC KEY CONTENT ====
-echo "Reading SSH public key content..."
-SSH_KEY_CONTENT=$(cat $SSH_KEY_PATH)
-
-# ==== STEP 3: CREATE VIRTUAL MACHINE ====
+# ==== STEP 2: CREATE VIRTUAL MACHINE ====
 echo "Creating virtual machine..."
 az vm create \
   --resource-group $RESOURCE_GROUP \
