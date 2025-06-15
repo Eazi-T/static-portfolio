@@ -53,7 +53,7 @@ EOF
 echo "Copying static files to VM..."
 scp -r DevFolio/* $ADMIN_USERNAME@$PUBLIC_IP:/tmp/
 
-ssh $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
+ssh -vvv $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
 sudo cp -r /tmp/* /var/www/html/
 sudo systemctl restart nginx
 EOF
