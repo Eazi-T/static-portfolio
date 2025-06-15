@@ -10,20 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Set up SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
 
-    - name: Prepare remote directory
-              run: ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} "sudo mkdir -p /var/www/html && sudo chown azureuser:azureuser /var/www/html"
+      - name: Prepare remote directory
+        run: ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} "sudo mkdir -p /var/www/html && sudo chown azureuser:azureuser /var/www/html"
 
-
-    - name: Deploy to Azure VM
-      run: |
-        scp -o StrictHostKeyChecking=no -r DevFolio/* azureuser@${{ secrets.VM_IP }}:/var/www/html/
+      - name: Deploy to Azure VM
+        run: |
+          scp -o StrictHostKeyChecking=no -r DevFolio/* azureuser@${{ secrets.VM_IP }}:/var/www/html/
