@@ -22,10 +22,10 @@ jobs:
 
     - name: Prepare remote directory
       run: |
-        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} << 'EOF'
-          sudo mkdir -p /var/www/html
+        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} '
+          sudo mkdir -p /var/www/html && 
           sudo chown azureuser:azureuser /var/www/html
-        EOF
+        '
 
     - name: Deploy to Azure VM
       run: |
