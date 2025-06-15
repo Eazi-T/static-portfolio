@@ -10,24 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
 
-      - name: Upload DevFolio directory to VM's home directory
-        run: |
-          scp -o StrictHostKeyChecking=no -r ./DevFolio azureuser@${{ secrets.VM_IP }}:~
+    - name: Upload DevFolio directory to VM's home directory
+      run: |
+        scp -o StrictHostKeyChecking=no -r ./DevFolio azureuser@${{ secrets.VM_IP }}:/home/azureuser
 
-      - name: Move site contents to /var/www/html and restart nginx
-        run: |
-          ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} << 'EOF'
-            sudo rm -rf /var/www/html/*
-            sudo cp -r ~/DevFolio/* /var/www/html/
-            sudo systemctl restart nginx
-          EOF
+    - name: Move site contents to /var/www/html and restart nginx
+      run: |
+        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} << 'EOF'
+          sudo rm -rf /var/www/html/*
+          sudo cp -r /home/azureuser/DevFolio/* /var/www/html/
+          sudo systemctl restart nginx
+        EOF
