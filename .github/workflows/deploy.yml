@@ -20,14 +20,14 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
 
-    - name: Debug - List files
-      run: ls -l && ls -l DevFolio
-
-
-    - name: Upload static files to Azure VM
+    - name: Upload and deploy static site
       run: |
-        scp -o StrictHostKeyChecking=no -r DevFolio/* azureuser@${{ secrets.VM_IP }}:/var/www/html/
+        # Upload DevFolio directory to VM's home directory
+        scp -o StrictHostKeyChecking=no -r DevFolio azureuser@${{ secrets.VM_IP }}:~/DevFolio
 
-    - name: Restart NGINX on Azure VM
-      run: |
-        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} "sudo systemctl restart nginx"
+        # SSH into VM: clean old files, copy new ones, and restart NGINX
+        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} << 'EOF'
+          sudo rm -rf /var/www/html/*
+          sudo cp -r ~/DevFolio/* /var/www/html/
+          sudo systemctl restart nginx
+        EOF
