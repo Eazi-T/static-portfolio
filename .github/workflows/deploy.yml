@@ -1,0 +1,25 @@
+name: Deploy Static Site to Azure VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
+
+    - name: Deploy to Azure VM
+      run: |
+        scp -o StrictHostKeyChecking=no -r DevFolio/* azureuser@${{ secrets.VM_IP }}:/var/www/html/
