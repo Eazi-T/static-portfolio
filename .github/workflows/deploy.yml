@@ -29,4 +29,4 @@ jobs:
 
       - name: Deploy to Azure VM
         run: |
-          scp -o StrictHostKeyChecking=no -r DevFolio/* azureuser@${{ secrets.VM_IP }}:/var/www/html/
+          scp -o StrictHostKeyChecking=no -r ./DevFolio/* azureuser@${{ secrets.VM_IP }}:/var/www/html/
