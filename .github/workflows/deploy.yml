@@ -20,6 +20,10 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
 
+    - name: Debug - List files
+      run: ls -l && ls -l DevFolio
+
+
     - name: Upload static files to Azure VM
       run: |
         scp -o StrictHostKeyChecking=no -r DevFolio/* azureuser@${{ secrets.VM_IP }}:/var/www/html/
