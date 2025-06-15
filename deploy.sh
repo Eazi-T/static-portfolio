@@ -13,7 +13,7 @@ SSH_KEY_PATH="./id_rsa.pub"
 echo "Creating resource group..."
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
-# ==== STEP 2: CREATE VIRTUAL MACHINE ====
+# ==== STEP 2: CREATE A VIRTUAL MACHINE ====
 echo "Creating virtual machine..."
 az vm create \
   --resource-group $RESOURCE_GROUP \
