@@ -22,9 +22,8 @@ jobs:
 
     - name: Ensure /var/www/html exists on VM
       run: |
-        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} "
-          sudo mkdir -p /var/www/html && sudo chown azureuser:azureuser /var/www/html
-        "
+        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} \
+        "sudo mkdir -p /var/www/html && sudo chown -R azureuser:azureuser /var/www/html"
 
     - name: Upload static files
       run: |
