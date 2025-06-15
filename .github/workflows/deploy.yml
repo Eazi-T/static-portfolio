@@ -20,14 +20,11 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
 
-    - name: Install NGINX and prepare web directory
+    - name: Ensure /var/www/html exists on VM
       run: |
-        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} << 'EOF'
-          sudo apt update
-          sudo apt install -y nginx
-          sudo mkdir -p /var/www/html
-          sudo chown azureuser:azureuser /var/www/html
-        EOF
+        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} "
+          sudo mkdir -p /var/www/html && sudo chown azureuser:azureuser /var/www/html
+        "
 
     - name: Upload static files
       run: |
