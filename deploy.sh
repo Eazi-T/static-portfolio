@@ -9,7 +9,7 @@ ADMIN_USERNAME="azureuser"
 VM_SIZE="Standard_B1s"
 SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
 
-# ==== STEP 1: CREATE A RESOURCE GROUP ====
+# ==== STEP 1: CREATE RESOURCE GROUP ====
 echo "Creating resource group..."
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
