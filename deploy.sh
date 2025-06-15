@@ -17,7 +17,7 @@ az group create --name $RESOURCE_GROUP --location $LOCATION
 echo "Reading SSH public key content..."
 SSH_KEY_CONTENT=$(cat $SSH_KEY_PATH)
 
-# ==== STEP 3: CREATE A VIRTUAL MACHINE ====
+# ==== STEP 3: CREATE VIRTUAL MACHINE ====
 echo "Creating virtual machine..."
 az vm create \
   --resource-group $RESOURCE_GROUP \
