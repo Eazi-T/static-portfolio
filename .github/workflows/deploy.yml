@@ -20,15 +20,10 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H "${{ secrets.VM_IP }}" >> ~/.ssh/known_hosts
 
-    - name: Ensure /var/www/html exists on VM
-      run: |
-        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} \
-        "sudo mkdir -p /var/www/html && sudo chown -R azureuser:azureuser /var/www/html"
-
-    - name: Upload static files
+    - name: Upload static files to Azure VM
       run: |
         scp -o StrictHostKeyChecking=no -r ./DevFolio/* azureuser@${{ secrets.VM_IP }}:/var/www/html/
 
-    - name: Restart NGINX
+    - name: Restart NGINX on Azure VM
       run: |
         ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} "sudo systemctl restart nginx"
