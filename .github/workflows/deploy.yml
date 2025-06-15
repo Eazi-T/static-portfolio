@@ -22,12 +22,10 @@ jobs:
 
     - name: Upload DevFolio directory to VM's home directory
       run: |
-        scp -o StrictHostKeyChecking=no -r DevFolio azureuser@${{ secrets.VM_IP }}:
+        scp -o StrictHostKeyChecking=no -r ./DevFolio azureuser@${{ secrets.VM_IP }}:~
 
-    - name: Move files to NGINX root and restart server
+    - name: Move files to NGINX directory and restart server
       run: |
-        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} << 'EOF'
-          sudo rm -rf /var/www/html/*
-          sudo cp -r ~/DevFolio/* /var/www/html/
-          sudo systemctl restart nginx
-        EOF
+        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} "\
+          sudo cp -r ~/DevFolio/* /var/www/html/ && \
+          sudo systemctl restart nginx"
