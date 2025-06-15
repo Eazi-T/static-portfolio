@@ -33,6 +33,13 @@ jobs:
         chmod 644 ~/.ssh/id_rsa.pub
         ls -l ~/.ssh
 
+    - name: Check SSH file content
+      run: |
+        ls -la ~/.ssh
+        cat ~/.ssh/id_rsa
+        echo "========="
+        cat ~/.ssh/id_rsa.pub
+
 
     - name: Run Deployment Script
       run: bash deploy.sh
