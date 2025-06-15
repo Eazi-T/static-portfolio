@@ -7,7 +7,13 @@ VM_NAME="StaticWebVM"
 IMAGE="Ubuntu2204"
 ADMIN_USERNAME="azureuser"
 VM_SIZE="Standard_B1s"
-SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
+SSH_PRIVATE_KEY="$HOME/.ssh/id_rsa"
+SSH_PUBLIC_KEY="$HOME/.ssh/id_rsa.pub"
+
+echo "Using SSH private key: $SSH_PRIVATE_KEY"
+ls -l $SSH_PRIVATE_KEY
+echo "Using SSH public key: $SSH_PUBLIC_KEY"
+ls -l $SSH_PUBLIC_KEY
 
 # ==== STEP 1: CREATE A RESOURCE GROUP ====
 echo "Creating resource group..."
@@ -22,7 +28,7 @@ az vm create \
   --size $VM_SIZE \
   --admin-username $ADMIN_USERNAME \
   --authentication-type ssh \
-  --ssh-key-values $SSH_KEY_PATH \
+  --ssh-key-values $SSH_PUBLIC_KEY \
   --output none
 
 # ==== STEP 3: OPEN PORT 80 ====
@@ -41,16 +47,16 @@ echo "Waiting for VM to initialize..."
 sleep 30
 
 echo "Installing NGINX on remote VM..."
-ssh -o StrictHostKeyChecking=no $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
+ssh -i $SSH_PRIVATE_KEY -o StrictHostKeyChecking=no $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
 sudo apt update
 sudo apt install -y nginx
 EOF
 
 # ==== STEP 5: COPY STATIC FILES ====
 echo "Copying static files to VM..."
-scp -r DevFolio/* $ADMIN_USERNAME@$PUBLIC_IP:/tmp/
+scp -i $SSH_PRIVATE_KEY -r DevFolio/* $ADMIN_USERNAME@$PUBLIC_IP:/tmp/
 
-ssh $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
+ssh -i $SSH_PRIVATE_KEY $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
 sudo cp -r /tmp/* /var/www/html/
 sudo systemctl restart nginx
 EOF
