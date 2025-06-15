@@ -1,59 +1,47 @@
 #!/bin/bash
 
-# ==== CONFIGURATION VARIABLES ====
+# Variables
 RESOURCE_GROUP="StaticWebsiteRG"
 LOCATION="eastus"
-VM_NAME="StaticWebVM"
-IMAGE="Ubuntu2204"
+VM_NAME="staticvm"
 ADMIN_USERNAME="azureuser"
+ADMIN_PASSWORD="Eazi2000@"  # CHANGE THIS to something secure!
+VM_IMAGE="Ubuntu2204"
 VM_SIZE="Standard_B1s"
-SSH_KEY_CONTENT="$1"  # Passed from GitHub Actions
 
-# ==== STEP 1: CREATE RESOURCE GROUP ====
-echo "Creating A resource group..."
+# Create resource group
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
-# ==== STEP 2: CREATE VIRTUAL MACHINE ====
-echo "Creating virtual machine..."
+# Create VM with password auth
 az vm create \
   --resource-group $RESOURCE_GROUP \
   --name $VM_NAME \
-  --image $IMAGE \
-  --size $VM_SIZE \
+  --image $VM_IMAGE \
   --admin-username $ADMIN_USERNAME \
-  --authentication-type ssh \
-  --ssh-key-values "$SSH_KEY_CONTENT" \
+  --admin-password $ADMIN_PASSWORD \
+  --authentication-type password \
+  --size $VM_SIZE \
   --output none
 
-# ==== STEP 4: OPEN PORT 80 ====
-echo "Opening port 80 for web traffic..."
+# Open port 80
 az vm open-port --port 80 --resource-group $RESOURCE_GROUP --name $VM_NAME --output none
 
-# ==== STEP 5: INSTALL NGINX AND COPY FILES ====
-PUBLIC_IP=$(az vm show \
-  --resource-group $RESOURCE_GROUP \
-  --name $VM_NAME \
-  --show-details \
-  --query publicIps \
-  --output tsv)
+# Get VM public IP
+IP=$(az vm show -d -g $RESOURCE_GROUP -n $VM_NAME --query publicIps -o tsv)
+echo "VM Public IP: $IP"
 
-echo "Waiting for VM to initialize..."
-sleep 30
-
-echo "Installing NGINX on remote VM..."
-ssh -o StrictHostKeyChecking=no $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
-sudo apt update
-sudo apt install -y nginx
+# Install NGINX remotely
+sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USERNAME@$IP << 'EOF'
+  sudo apt update
+  sudo apt install -y nginx
 EOF
 
-echo "Copying static files to VM..."
-scp -r DevFolio/* $ADMIN_USERNAME@$PUBLIC_IP:/tmp/
+# Copy site files to VM
+sshpass -p $ADMIN_PASSWORD scp -o StrictHostKeyChecking=no -r ./DevFolio/* $ADMIN_USERNAME@$IP:/tmp/
 
-ssh -vvv $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
-sudo cp -r /tmp/* /var/www/html/
-sudo systemctl restart nginx
+# Move files into NGINX root
+sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USERNAME@$IP << 'EOF'
+  sudo cp -r /tmp/* /var/www/html/
 EOF
 
-# ==== DONE ====
-echo "Deployment complete!"
-echo "Visit your site at: http://$PUBLIC_IP"
+echo "✅ Deployment complete. Visit http://$IP"
