@@ -24,10 +24,12 @@ jobs:
       run: |
         scp -o StrictHostKeyChecking=no -r DevFolio azureuser@${{ secrets.VM_IP }}:
 
-    - name: Move site contents to /var/www/html and restart nginx
-      run: |
-        ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} << 'EOF'
-          sudo rm -rf /var/www/html/*
-          sudo cp -r /home/azureuser/DevFolio/* /var/www/html/
-          sudo systemctl restart nginx
-        EOF
+- name: Move site contents to /var/www/html and restart nginx
+  run: |
+    ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.VM_IP }} << 'EOF'
+      sudo rm -rf /var/www/html/*
+      sudo cp -r /home/azureuser/DevFolio/* /var/www/html/
+      sudo chown -R www-data:www-data /var/www/html
+      sudo systemctl restart nginx
+    EOF
+
