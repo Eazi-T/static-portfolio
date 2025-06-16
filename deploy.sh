@@ -1,47 +1,61 @@
 #!/bin/bash
+set -e  # Exit if any command fails
 
-# Variables
+# ==== CONFIGURATION VARIABLES ====
 RESOURCE_GROUP="StaticWebsiteRG"
 LOCATION="eastus"
-VM_NAME="staticvm"
+VM_NAME="StaticWebVM"
+IMAGE="Ubuntu2204"
 ADMIN_USERNAME="azureuser"
-ADMIN_PASSWORD="Eazi2000@"  # CHANGE THIS to something secure!
-VM_IMAGE="Ubuntu2204"
 VM_SIZE="Standard_B1s"
+SSH_KEY_PATH="$HOME/.ssh/id_rsa.pub"
 
-# Create resource group
+# ==== STEP 1: CREATE RESOURCE GROUP ====
+echo "Creating resource group..."
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
-# Create VM with password auth
+# ==== STEP 2: CREATE VIRTUAL MACHINE ====
+echo "Creating virtual machine..."
 az vm create \
   --resource-group $RESOURCE_GROUP \
   --name $VM_NAME \
-  --image $VM_IMAGE \
-  --admin-username $ADMIN_USERNAME \
-  --admin-password $ADMIN_PASSWORD \
-  --authentication-type password \
+  --image $IMAGE \
   --size $VM_SIZE \
+  --admin-username $ADMIN_USERNAME \
+  --authentication-type ssh \
+  --ssh-key-values "$SSH_KEY_PATH" \
   --output none
 
-# Open port 80
+# ==== STEP 3: OPEN PORT 80 ====
+echo "Opening port 80 for web traffic..."
 az vm open-port --port 80 --resource-group $RESOURCE_GROUP --name $VM_NAME --output none
 
-# Get VM public IP
-IP=$(az vm show -d -g $RESOURCE_GROUP -n $VM_NAME --query publicIps -o tsv)
-echo "VM Public IP: $IP"
+# ==== STEP 4: INSTALL NGINX AND COPY FILES ====
+PUBLIC_IP=$(az vm show \
+  --resource-group $RESOURCE_GROUP \
+  --name $VM_NAME \
+  --show-details \
+  --query publicIps \
+  --output tsv)
 
-# Install NGINX remotely
-sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USERNAME@$IP << 'EOF'
+echo "Waiting for VM to initialize..."
+sleep 30
+
+echo "Installing NGINX on remote VM..."
+ssh -o StrictHostKeyChecking=no $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
   sudo apt update
   sudo apt install -y nginx
 EOF
 
-# Copy site files to VM
-sshpass -p $ADMIN_PASSWORD scp -o StrictHostKeyChecking=no -r ./DevFolio/* $ADMIN_USERNAME@$IP:/tmp/
+# ==== STEP 5: COPY STATIC FILES ====
+echo "Copying static files to VM..."
+scp -r DevFolio/* $ADMIN_USERNAME@$PUBLIC_IP:/tmp/
 
-# Move files into NGINX root
-sshpass -p $ADMIN_PASSWORD ssh -o StrictHostKeyChecking=no $ADMIN_USERNAME@$IP << 'EOF'
+ssh $ADMIN_USERNAME@$PUBLIC_IP << 'EOF'
   sudo cp -r /tmp/* /var/www/html/
+  sudo systemctl restart nginx
 EOF
 
-echo "✅ Deployment complete. Visit http://$IP"
+# ==== DONE ====
+echo "Deployment complete!"
+echo "Visit your site at: http://$PUBLIC_IP"
